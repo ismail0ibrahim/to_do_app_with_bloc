@@ -2,15 +2,17 @@
 // User Model - نموذج بيانات المستخدم
 // =====================================
 
+import 'package:equatable/equatable.dart';
+
 /// كلاس User بيمثل بيانات المستخدم
 /// بيحتوي على معلومات المستخدم الأساسية
-class User {
-  final String id; // معرف المستخدم الفريد
+class User extends Equatable {
+  final String id; // معرف المستخدم الفريد (Firebase UID)
   final String firstName; // الاسم الأول
   final String lastName; // الاسم الأخير
   final String email; // البريد الإلكتروني للمستخدم
-  final String
-  password; // كلمة السر (ملاحظة: في التطبيقات الحقيقية نخزنها مشفرة)
+  final String password; // كلمة السر (تخزن في Firebase بشكل آمن)
+  final DateTime createdAt; // تاريخ إنشاء الحساب
 
   /// Constructor - البناء الأساسي للـ User
   User({
@@ -19,7 +21,18 @@ class User {
     required this.lastName,
     required this.email,
     required this.password,
-  });
+    DateTime? createdAt,
+  }) : createdAt = createdAt ?? DateTime.now();
+
+  @override
+  List<Object?> get props => [
+    id,
+    firstName,
+    lastName,
+    email,
+    password,
+    createdAt,
+  ];
 
   /// الحصول على الاسم الكامل
   String get fullName => '$firstName $lastName';
@@ -49,6 +62,7 @@ class User {
     String? lastName,
     String? email,
     String? password,
+    DateTime? createdAt,
   }) {
     return User(
       id: id ?? this.id,
@@ -56,6 +70,7 @@ class User {
       lastName: lastName ?? this.lastName,
       email: email ?? this.email,
       password: password ?? this.password,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 
@@ -67,6 +82,7 @@ class User {
       'lastName': lastName,
       'email': email,
       'password': password,
+      'createdAt': createdAt.toIso8601String(),
     };
   }
 
@@ -78,6 +94,9 @@ class User {
       lastName: json['lastName'] ?? '',
       email: json['email'] ?? '',
       password: json['password'] ?? '',
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : DateTime.now(),
     );
   }
 }

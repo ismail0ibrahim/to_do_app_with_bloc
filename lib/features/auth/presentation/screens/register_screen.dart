@@ -49,7 +49,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         return;
       }
 
-      // إرسال حدث التسجيل
+      // إرسال حدث التسجيل مع الاسم الأول والأخير مباشرة
       context.read<AuthBloc>().add(
         RegisterEvent(
           email: _emailController.text.trim(),
@@ -245,7 +245,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   const SizedBox(height: 16),
 
-                  // عرض الأخطاء
+                  // عرض الأخطاء والنجاح
                   BlocListener<AuthBloc, AuthState>(
                     listener: (context, state) {
                       if (state is AuthErrorState) {
@@ -253,22 +253,66 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           SnackBar(
                             content: Text(state.message),
                             backgroundColor: Colors.red,
+                            duration: const Duration(seconds: 3),
                           ),
                         );
                       }
                       if (state is AuthSuccessState) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('تم التسجيل بنجاح'),
-                            backgroundColor: Colors.green,
+                        // عرض رسالة النجاح مع بيانات المستخدم
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) => AlertDialog(
+                            title: const Text('✓ تم التسجيل بنجاح'),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 16),
+                                Text(
+                                  'مرحباً ${state.user.fullName}',
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'البريد: ${state.user.email}',
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  'الرجاء تسجيل الدخول بحسابك الجديد',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            actions: [
+                              ElevatedButton(
+                                onPressed: () {
+                                  Navigator.of(
+                                    context,
+                                  ).pop(); // إغلاق الـ Dialog
+                                  // الانتقال لشاشة اللوجين
+                                  Navigator.of(
+                                    context,
+                                  ).popUntil((route) => route.isFirst);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue,
+                                ),
+                                child: const Text(
+                                  'اذهب للدخول',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ],
                           ),
                         );
-                        // الانتقال للشاشة الرئيسية
-                        Future.delayed(const Duration(milliseconds: 500), () {
-                          Navigator.of(
-                            context,
-                          ).pushNamedAndRemoveUntil('/home', (route) => false);
-                        });
                       }
                     },
                     child: const SizedBox(),

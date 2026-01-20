@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 import 'features/todo/presentation/bloc/task_bloc.dart';
 import 'features/todo/presentation/screen/todo_screen.dart';
@@ -7,9 +9,13 @@ import 'features/todo/presentation/screen/todo_screen.dart';
 import 'features/auth/data/repositories/auth_repository_impl.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
+import 'features/auth/presentation/screens/register_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // تهيئة Firebase
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // تهيئة AuthRepositoryImpl قبل تشغيل التطبيق
   final authRepository = AuthRepositoryImpl();
@@ -33,7 +39,7 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         // BlocProvider بيعمل create للـ AuthBloc (لتسجيل الدخول)
-        // الآن بنستخدم AuthRepositoryImpl (بدون Firebase)
+        // الآن بنستخدم AuthRepositoryImpl مع Firebase
         BlocProvider<AuthBloc>(
           create: (_) => AuthBloc(authRepository: authRepository),
         ),
@@ -44,10 +50,13 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false, // بيشيل Banner الأحمر بتاع Debug
         title: 'To Do App with Bloc', // اسم التطبيق
         theme: ThemeData(primarySwatch: Colors.blue), // الثيم الأساسي
-        // الآن الشاشة الأولى هي LoginScreen بدل TodoScreen
-        home: const LoginScreen(), // شاشة اللوجن هي الشاشة الأولى
+        // الشاشة الأولى للمستخدم الجديد هي RegisterScreen
+        home: const RegisterScreen(),
         // إضافة الروابط
-        routes: {'/home': (context) => const TodoScreen()},
+        routes: {
+          '/login': (context) => const LoginScreen(),
+          '/home': (context) => const TodoScreen(),
+        },
       ),
     );
   }
